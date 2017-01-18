@@ -73,12 +73,12 @@ def _escapeCharacters(tag):
 			continue
 		c.replace_with(c.replace('_','\\_').replace('*','\\*'))
 
-def _stripSpacesNewlines(tag):
-	'''non-recursively strip spaces and remove newlines in the tag'''
+def _breakRemNewlines(tag):
+	'''non-recursively break spaces and remove newlines in the tag'''
 	for i,c in enumerate(tag.contents):
 		if type(c) != bs4.element.NavigableString:
 			continue
-		c.replace_with(''.join(s.strip(' ') for s in c.split('\n')))
+		c.replace_with(re.sub(r' {2,}', ' ', c).replace('\n',''))
 
 def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 	'''recursively converts a tag into markdown'''
@@ -100,7 +100,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 		return
 	if tag.name not in ('pre', 'code'):
 		_escapeCharacters(tag)
-		_stripSpacesNewlines(tag)
+		_breakRemNewlines(tag)
 	if tag.name == 'p':
 		if tag.string != None:
 			if tag.string.strip() == u'':
