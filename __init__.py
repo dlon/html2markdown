@@ -230,6 +230,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			for child in children:
 				_markdownify(child)
 			for c in tag.contents:
+				if type(c) != bs4.element.NavigableString:
+					continue
 				c.replace_with('\n    '.join(c.split('\n')))
 			tag.insert_after('\n')
 			tag.unwrap()
