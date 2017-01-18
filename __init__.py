@@ -104,8 +104,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 	if tag.name == 'p':
 		if tag.string != None:
 			if tag.string.strip() == u'':
-				# FIXME: leave only &nbsp;
-				#tag.string = u'\xa0'
+				tag.string = u'\xa0'
+				tag.unwrap()
 				return
 		if not _blockQuote:
 			tag.insert_before('\n\n')
