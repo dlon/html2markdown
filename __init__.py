@@ -73,10 +73,17 @@ def _escapeCharacters(tag):
 			continue
 		c.replace_with(c.replace('_','\\_').replace('*','\\*'))
 
+def _stripSpacesNewlines(tag):
+	'''non-recursively strip spaces and newlines in the tag'''
+	for i,c in enumerate(tag.contents):
+		if type(c) != bs4.element.NavigableString:
+			continue
+		c.replace_with(''.join(s.strip() for s in c.split('\n')))
+
 def _markdownify(tag, _listType=None, _blockQuote=False):
 	'''recursively converts a tag into markdown'''
 	children = tag.find_all(recursive=False)
-	
+
 	if tag.name == '[document]':
 		for child in children:
 			_markdownify(child)
@@ -174,6 +181,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			tag.insert_after('\n\n')
 			tag.unwrap()
 		elif tag.name in ('ul', 'ol'):
+			_stripSpacesNewlines(tag)
 			tag.insert_before('\n\n')
 			tag.insert_after('\n\n')
 			tag.unwrap()
@@ -189,9 +197,13 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			else:
 				# TODO: increment the number
 				tag.insert_before('1.   ')
-			#tag.insert_after('\n')
-			# FIXME: make sure there are enough newlines
+			for child in children:
+				_markdownify(child)
+			for c in tag.contents:
+				c.replace_with('\n    '.join(c.split('\n')))
+			tag.insert_after('\n')
 			tag.unwrap()
+			return
 		elif tag.name in ('strong','b'):
 			tag.insert_before('__')
 			tag.insert_after('__')
@@ -224,7 +236,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			return
 		elif tag.name == 'code':
 			# inline code
-			# FIXME: <code> and <pre> should not be checked for recursive validity
 			tag.insert_before('`` ')
 			tag.insert_after(' ``')
 			tag.unwrap()
