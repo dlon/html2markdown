@@ -74,11 +74,11 @@ def _escapeCharacters(tag):
 		c.replace_with(c.replace('_','\\_').replace('*','\\*'))
 
 def _stripSpacesNewlines(tag):
-	'''non-recursively strip spaces and newlines in the tag'''
+	'''non-recursively strip spaces and remove newlines in the tag'''
 	for i,c in enumerate(tag.contents):
 		if type(c) != bs4.element.NavigableString:
 			continue
-		c.replace_with(''.join(s.strip() for s in c.split('\n')))
+		c.replace_with(''.join(s.strip(' ') for s in c.split('\n')))
 
 def _markdownify(tag, _listType=None, _blockQuote=False):
 	'''recursively converts a tag into markdown'''
@@ -99,6 +99,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 				_markdownify(child)
 		return
 	_escapeCharacters(tag)
+	if tag.name != 'pre':
+		_stripSpacesNewlines(tag)
 	if tag.name == 'p':
 		if tag.string != None:
 			if tag.string.strip() == u'':
@@ -181,7 +183,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			tag.insert_after('\n\n')
 			tag.unwrap()
 		elif tag.name in ('ul', 'ol'):
-			_stripSpacesNewlines(tag)
 			tag.insert_before('\n\n')
 			tag.insert_after('\n\n')
 			tag.unwrap()
