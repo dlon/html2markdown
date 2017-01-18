@@ -133,6 +133,37 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 	elif tag.name == 'hr':
 		tag.string = '\n---\n'
 		tag.unwrap()
+	elif tag.name == 'pre':
+		tag.insert_before('\n\n')
+		tag.insert_after('\n\n')
+		if tag.code:
+			if not _supportedAttrs(tag.code):
+				return
+			for child in tag.code.find_all(recursive=False):
+				if child.name != 'br':
+					return
+			# code block
+			for br in tag.code.find_all('br'):
+				br.string = '\n'
+				br.unwrap()
+			tag.code.unwrap()
+			lines = unicode(tag).strip().split('\n')
+			lines[0] = lines[0][5:]
+			lines[-1] = lines[-1][:-6]
+			if not lines[-1]:
+				lines.pop()
+			for i,line in enumerate(lines):
+				line = line.replace(u'\xa0', ' ') # FIXME: should this be done by the client?
+				lines[i] = '    %s' % line
+			tag.replace_with(BeautifulSoup('\n'.join(lines), 'html.parser'))
+		return
+	elif tag.name == 'code':
+		# inline code
+		if children:
+			return
+		tag.insert_before('`` ')
+		tag.insert_after(' ``')
+		tag.unwrap()
 	elif _recursivelyValid(tag):
 		if tag.name == 'blockquote':
 			# ! FIXME: hack
@@ -212,33 +243,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			tag.insert_before('_')
 			tag.insert_after('_')
 			tag.unwrap()
-		elif tag.name == 'pre':
-			tag.insert_before('\n\n')
-			tag.insert_after('\n\n')
-			if tag.code:
-				if not _supportedAttrs(tag.code):
-					return
-				# code block
-				for br in tag.code.find_all('br'):
-					br.string = '\n'
-					br.unwrap()
-				tag.code.unwrap()
-				lines = unicode(tag).strip().split('\n')
-				lines[0] = lines[0][5:]
-				lines[-1] = lines[-1][:-6]
-				if not lines[-1]:
-					lines.pop()
-				for i,line in enumerate(lines):
-					line = line.replace(u'\xa0', ' ') # FIXME: should this be done by the client?
-					lines[i] = '    %s' % line
-				tag.replace_with(BeautifulSoup('\n'.join(lines), 'html.parser'))
-			return
-		elif tag.name == 'code':
-			# inline code
-			tag.insert_before('`` ')
-			tag.insert_after(' ``')
-			tag.unwrap()
-			return # don't process anything inside
 		for child in children:
 			_markdownify(child)
 
