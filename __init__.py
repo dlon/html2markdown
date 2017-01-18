@@ -80,7 +80,7 @@ def _stripSpacesNewlines(tag):
 			continue
 		c.replace_with(''.join(s.strip(' ') for s in c.split('\n')))
 
-def _markdownify(tag, _listType=None, _blockQuote=False):
+def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 	'''recursively converts a tag into markdown'''
 	children = tag.find_all(recursive=False)
 
@@ -186,8 +186,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			tag.insert_before('\n\n')
 			tag.insert_after('\n\n')
 			tag.unwrap()
-			for child in children:
-				_markdownify(child, _listType=tag.name)
+			for i, child in enumerate(children):
+				_markdownify(child, _listType=tag.name, _listIndex=i+1)
 			return
 		elif tag.name == 'li':
 			if not _listType:
@@ -196,8 +196,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False):
 			if _listType == 'ul':
 				tag.insert_before('*   ')
 			else:
-				# TODO: increment the number
-				tag.insert_before('1.   ')
+				tag.insert_before('%d.   ' % _listIndex)
 			for child in children:
 				_markdownify(child)
 			for c in tag.contents:
