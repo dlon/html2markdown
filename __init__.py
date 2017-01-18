@@ -121,7 +121,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 		tag.string = '  \n'
 		tag.unwrap()
 	elif tag.name == 'img':
-		# FIXME: is this in the right place?
 		alt = ''
 		title = ''
 		if tag.has_attr('alt'):
@@ -153,7 +152,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			if not lines[-1]:
 				lines.pop()
 			for i,line in enumerate(lines):
-				line = line.replace(u'\xa0', ' ') # FIXME: should this be done by the client?
+				line = line.replace(u'\xa0', ' ')
 				lines[i] = '    %s' % line
 			tag.replace_with(BeautifulSoup('\n'.join(lines), 'html.parser'))
 		return
@@ -248,8 +247,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 
 def toMarkdown(html):
 	"""converts an html string to markdown while preserving unsupported markup."""
-	#html = ''.join(line.strip() for line in html.split('\n'))
-	# FIXME: will this work? (need to preserve newlines for code blocks)
 	bs = BeautifulSoup(html, 'html.parser')
 	_markdownify(bs)
 	ret = unicode(bs).replace(u'\xa0', '&nbsp;')
