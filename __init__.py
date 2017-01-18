@@ -98,8 +98,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			for child in children:
 				_markdownify(child)
 		return
-	_escapeCharacters(tag)
-	if tag.name != 'pre':
+	if tag.name not in ('pre', 'code'):
+		_escapeCharacters(tag)
 		_stripSpacesNewlines(tag)
 	if tag.name == 'p':
 		if tag.string != None:
@@ -220,7 +220,6 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 					return
 				# code block
 				for br in tag.code.find_all('br'):
-					# FIXME: should this be done by the client?
 					br.string = '\n'
 					br.unwrap()
 				tag.code.unwrap()
