@@ -247,7 +247,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 		for child in children:
 			_markdownify(child)
 
-def toMarkdown(html):
+def convert(html):
 	"""converts an html string to markdown while preserving unsupported markup."""
 	bs = BeautifulSoup(html, 'html.parser')
 	_markdownify(bs)
