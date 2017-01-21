@@ -1,6 +1,6 @@
 # html2markdown
 
-**Experimental**: I have only tested this with the python markdown module, and under relatively limited circumstances.
+**Experimental**: I have only tested this with the Python markdown module, and under relatively limited circumstances.
 
 Converts html to markdown while preserving unsupported html markup. The goal is to generate markdown that can be converted back into html. This is the major difference between html2markdown and html2text. The latter doesn't purport to necessarily be reversible.
 
