@@ -262,4 +262,4 @@ def convert(html):
 			sp[i] = '> ' + e[len('&lt;&lt;&lt;BLOCKQUOTE:') : -len('&gt;&gt;&gt;')]
 			sp[i] = sp[i].replace('\n', '\n> ')
 	ret = ''.join(sp)
-	return ret
+	return ret.strip('\n')
