@@ -6,6 +6,10 @@ import bs4
 from bs4 import BeautifulSoup
 import re
 
+import sys
+if sys.version_info.major > 2:
+    unicode = str
+
 _supportedTags = (
 	# NOTE: will be ignored if they have unsupported attributes (cf. _supportedAttributes)
 	'blockquote',
