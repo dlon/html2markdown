@@ -55,6 +55,7 @@ class TestTags(unittest.TestCase):
 	problematic_a_string_1 = "before <a>test</a> after"
 	problematic_a_string_2 = "before <a title='test_title'>test</a> after"
 	problematic_a_string_3 = "<a></a>"
+	problematic_a_string_4 = "<a href='test' title='test'>test</a>"
 	def test_h2(self):
 		mdStr = html2markdown.convert(self.genericStr)
 		reconstructedStr = markdown.markdown(mdStr)
@@ -74,6 +75,9 @@ class TestTags(unittest.TestCase):
 
 		mdStr = html2markdown.convert(self.problematic_a_string_3)
 		assert mdStr == '[]()'
+
+		mdStr = html2markdown.convert(self.problematic_a_string_4)
+		assert mdStr == '[test](test "test")'
 
 if __name__ == '__main__':
 	unittest.main()
