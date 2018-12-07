@@ -187,6 +187,8 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 				tag.string = '[%s](%s%s)' % (BeautifulSoup(unicode(tag), 'html.parser').string,
 					tag.get('href', ''),
 					title)
+			elif tag.string == tag.get('href') == tag.get('title'):
+				tag.string = '[]()'
 			else:
 				# ! FIXME: hack
 				tag.string = '<<<FLOATING LINK: %s>>>' % tag.string
