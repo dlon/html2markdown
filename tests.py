@@ -52,7 +52,8 @@ class TestEscaping(unittest.TestCase):
 class TestTags(unittest.TestCase):
 
 	genericStr = '<div><p>asdf</p></div><h2>Test</h2><pre><code>Here is some code</code></pre>'
-
+	problematic_a_string_1 = "before <a>test</a> after"
+	problematic_a_string_2 = "before <a title='test_title'>test</a> after"
 	def test_h2(self):
 		mdStr = html2markdown.convert(self.genericStr)
 		reconstructedStr = markdown.markdown(mdStr)
@@ -62,6 +63,13 @@ class TestTags(unittest.TestCase):
 
 		self.assertEqual(childTags[1].name, 'h2')
 		self.assertEqual(childTags[1].string, 'Test')
+
+	def test_a(self):
+		mdStr = html2markdown.convert(self.problematic_a_string_1)
+		assert mdStr == "before [test]() after"
+
+		mdStr = html2markdown.convert(self.problematic_a_string_2)
+		assert mdStr == 'before [test]( "test_title") after'
 
 if __name__ == '__main__':
 	unittest.main()
