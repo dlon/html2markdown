@@ -53,9 +53,11 @@ class TestTags(unittest.TestCase):
 
 	genericStr = '<div><p>asdf</p></div><h2>Test</h2><pre><code>Here is some code</code></pre>'
 	problematic_a_string_1 = "before <a>test</a> after"
-	problematic_a_string_2 = "before <a title='test_title'>test</a> after"
+	problematic_a_string_2 = "before <a title=\"test_title\">test</a> after"
 	problematic_a_string_3 = "<a></a>"
-	problematic_a_string_4 = "<a href='test' title='test'>test</a>"
+	problematic_a_string_4 = "<a href=\"test\" title=\"test\">test</a>"
+	problematic_a_string_5 = "<a href=\"test\">test</a>"
+	problematic_a_string_6 = "<a href=\"test2\">test</a>"
 	def test_h2(self):
 		mdStr = html2markdown.convert(self.genericStr)
 		reconstructedStr = markdown.markdown(mdStr)
@@ -68,16 +70,25 @@ class TestTags(unittest.TestCase):
 
 	def test_a(self):
 		mdStr = html2markdown.convert(self.problematic_a_string_1)
-		assert mdStr == "before [test]() after"
+		self.assertEqual(mdStr, self.problematic_a_string_1,
+			"<a> tag without an href attribute should be left alone")
 
 		mdStr = html2markdown.convert(self.problematic_a_string_2)
-		assert mdStr == 'before [test]( "test_title") after'
+		self.assertEqual(mdStr, self.problematic_a_string_2,
+			"<a> tag without an href attribute should be left alone")
 
 		mdStr = html2markdown.convert(self.problematic_a_string_3)
-		assert mdStr == '[]()'
+		self.assertEqual(mdStr, self.problematic_a_string_3,
+			"<a> tag without an href attribute should be left alone")
 
 		mdStr = html2markdown.convert(self.problematic_a_string_4)
-		assert mdStr == '[test](test "test")'
+		self.assertEqual(mdStr, '[test](test "test")')
+
+		mdStr = html2markdown.convert(self.problematic_a_string_5)
+		self.assertEqual(mdStr, '<test>')
+
+		mdStr = html2markdown.convert(self.problematic_a_string_6)
+		self.assertEqual(mdStr, '[test](test2)')
 
 if __name__ == '__main__':
 	unittest.main()
