@@ -180,12 +180,14 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			# process children first
 			for child in children:
 				_markdownify(child)
-			if tag.string != tag['href'] or tag.has_attr('title'):
+			if not tag.has_attr('href'):
+				return
+			if tag.string != tag.get('href') or tag.has_attr('title'):
 				title = ''
-				if tag.has_attr('title') and tag['title']:
+				if tag.has_attr('title'):
 					title = ' "%s"' % tag['title']
 				tag.string = '[%s](%s%s)' % (BeautifulSoup(unicode(tag), 'html.parser').string,
-					tag['href'],
+					tag.get('href', ''),
 					title)
 			else:
 				# ! FIXME: hack
