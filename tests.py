@@ -28,26 +28,69 @@ class TestGenericTags(unittest.TestCase):
 
 class TestEscaping(unittest.TestCase):
 
+	escapableChars = r'\`*_{}[]()#+-.!'
+
+	@classmethod
+	def setUpClass(cls):
+		cls.escapedChars = html2markdown._escapeCharSequence
+
 	def test_block_tag_escaping(self):
 		"""formatting characters should NOT be escaped for block-type tags (except <p>)"""
-		testStr = '<div>**escape me**</div>'
-		expectedStr = '<div>**escape me**</div>'
-		mdStr = html2markdown.convert(testStr)
-		self.assertEqual(mdStr, expectedStr)
+		for escChar in self.escapableChars:
+			testStr = '<div>**escape me**</div>'.replace('*', escChar)
+			expectedStr = '<div>**escape me**</div>'.replace('*', escChar)
+			mdStr = html2markdown.convert(testStr)
+			self.assertEqual(mdStr, expectedStr)
 
 	def test_p_escaping(self):
 		"""formatting characters should be escaped for p tags"""
-		testStr = '<p>**escape me**</p>'
-		expectedStr = '\*\*escape me\*\*'
-		mdStr = html2markdown.convert(testStr)
-		self.assertEqual(mdStr, expectedStr)
+		for escChar in self.escapedChars:
+			testStr = '<p>**escape me**</p>'.replace('*', escChar)
+			expectedStr = '\*\*escape me\*\*'.replace('*', escChar)
+			mdStr = html2markdown.convert(testStr)
+			self.assertEqual(mdStr, expectedStr)
+
+	def test_p_escaping_2(self):
+		"""ensure all escapable characters are retained for <p>"""
+		for escChar in self.escapableChars:
+			testStr = '<p>**escape me**</p>'.replace('*', escChar)
+			mdStr = html2markdown.convert(testStr)
+			reconstructedStr = markdown.markdown(mdStr)
+			self.assertEqual(reconstructedStr, testStr)
 
 	def test_inline_tag_escaping(self):
 		"""formatting characters should be escaped for inline-type tags"""
-		testStr = '<span>**escape me**</span>'
-		expectedStr = '<span>\*\*escape me\*\*</span>'
-		mdStr = html2markdown.convert(testStr)
-		self.assertEqual(mdStr, expectedStr)
+		for escChar in self.escapedChars:
+			testStr = '<span>**escape me**</span>'
+			expectedStr = '<span>\*\*escape me\*\*</span>'
+			mdStr = html2markdown.convert(testStr)
+			self.assertEqual(mdStr, expectedStr)
+
+	def test_inline_tag_escaping_2(self):
+		"""ensure all escapable characters are retained for inline-type tags"""
+		for escChar in self.escapableChars:
+			testStr = '<p><span>**escape me**</span></p>'
+			mdStr = html2markdown.convert(testStr)
+			reconstructedStr = markdown.markdown(mdStr)
+			self.assertEqual(reconstructedStr, testStr)
+
+	def test_header(self):
+		result = html2markdown.convert('<p># test</p>')
+		bs = bs4.BeautifulSoup(markdown.markdown(result), 'html.parser')
+		self.assertEqual(len(bs.find_all('h1')), 0)
+
+		result = html2markdown.convert('<p><h1>test</h1></p>')
+		bs = bs4.BeautifulSoup(markdown.markdown(result), 'html.parser')
+		self.assertEqual(len(bs.find_all('h1')), 1)
+
+	def test_links(self):
+		result = html2markdown.convert('<p>[http://google.com](test)</p>')
+		bs = bs4.BeautifulSoup(markdown.markdown(result), 'html.parser')
+		self.assertEqual(len(bs.find_all('a')), 0)
+
+		result = html2markdown.convert('<p><a href="http://google.com">test</a></p>')
+		bs = bs4.BeautifulSoup(markdown.markdown(result), 'html.parser')
+		self.assertEqual(len(bs.find_all('a')), 1)
 
 class TestTags(unittest.TestCase):
 
@@ -58,6 +101,7 @@ class TestTags(unittest.TestCase):
 	problematic_a_string_4 = "<a href=\"test\" title=\"test\">test</a>"
 	problematic_a_string_5 = "<a href=\"test\">test</a>"
 	problematic_a_string_6 = "<a href=\"test2\">test</a>"
+
 	def test_h2(self):
 		mdStr = html2markdown.convert(self.genericStr)
 		reconstructedStr = markdown.markdown(mdStr)

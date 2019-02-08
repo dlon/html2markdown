@@ -1,6 +1,5 @@
 """html2markdown converts an html string to markdown while preserving unsupported markup."""
 # TODO:
-#	escape all characters (in _escapeCharacters. cf. https://daringfireball.net/projects/markdown/syntax#backslash)
 #	implement standard <table> (i.e. without attributes)
 import bs4
 from bs4 import BeautifulSoup
@@ -69,23 +68,30 @@ def _recursivelyValid(tag):
 		return False
 	return True
 
+
+
+_escapeCharSequence = tuple(r'\`*_[]#')
+_escapeCharRegexStr = '([{}])'.format(''.join(re.escape(c) for c in _escapeCharSequence))
+_escapeCharSub = re.compile(_escapeCharRegexStr).sub
+
+
 def _escapeCharacters(tag):
-	'''non-recursively escape underlines and asterisks
-	in the tag'''
+	"""non-recursively escape underlines and asterisks
+	in the tag"""
 	for i,c in enumerate(tag.contents):
 		if type(c) != bs4.element.NavigableString:
 			continue
-		c.replace_with(c.replace('_','\\_').replace('*','\\*'))
+		c.replace_with(_escapeCharSub(r'\\\1', c))
 
 def _breakRemNewlines(tag):
-	'''non-recursively break spaces and remove newlines in the tag'''
+	"""non-recursively break spaces and remove newlines in the tag"""
 	for i,c in enumerate(tag.contents):
 		if type(c) != bs4.element.NavigableString:
 			continue
 		c.replace_with(re.sub(r' {2,}', ' ', c).replace('\n',''))
 
 def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
-	'''recursively converts a tag into markdown'''
+	"""recursively converts a tag into markdown"""
 	children = tag.find_all(recursive=False)
 
 	if tag.name == '[document]':
