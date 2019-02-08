@@ -9,7 +9,7 @@ import sys
 if sys.version_info[0] > 2:
 	unicode = str
 
-_supportedTags = (
+_supportedTags = {
 	# NOTE: will be ignored if they have unsupported attributes (cf. _supportedAttributes)
 	'blockquote',
 	'p',
@@ -22,7 +22,7 @@ _supportedTags = (
 	'img',
 	'pre','code',
 	'hr'
-)
+}
 _supportedAttributes = (
 	'a href',
 	'a title',
@@ -31,17 +31,67 @@ _supportedAttributes = (
 	'img title',
 )
 
-_inlineTags = (
+_inlineTags = {
 	# these can be mixed with markdown (when unprocessed)
 	# block tags will be surrounded by newlines and be unprocessed inside
 	# (unless supported tag + supported attribute[s])
-	'span',
-	'strong','b',
-	'em','i',
 	'a',
-	'img',
-	'code'
-)
+	'abbr',
+	'acronym',
+	'audio',
+	'b',
+	'bdi',
+	'bdo',
+	'big',
+	#'br',
+	'button',
+	#'canvas',
+	'cite',
+	'code',
+	'data',
+	'datalist',
+	'del',
+	'dfn',
+	'em',
+	#'embed',
+	'i',
+	#'iframe',
+	#'img',
+	#'input',
+	'ins',
+	'kbd',
+	'label',
+	'map',
+	'mark',
+	'meter',
+	#'noscript',
+	'object',
+	#'output',
+	'picture',
+	#'progress',
+	'q',
+	'ruby',
+	's',
+	'samp',
+	#'script',
+	'select',
+	'slot',
+	'small',
+	'span',
+	'strike',
+	'strong',
+	'sub',
+	'sup',
+	'svg',
+	'template',
+	'textarea',
+	'time',
+	'u',
+	'tt',
+	'var',
+	#'video',
+	'wbr',
+}
 
 def _supportedAttrs(tag):
 	sAttrs = [attr.split(' ')[1] for attr in _supportedAttributes if attr.split(' ')[0]==tag.name]

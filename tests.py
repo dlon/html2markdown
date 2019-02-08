@@ -6,6 +6,13 @@ import bs4
 
 class TestGenericTags(unittest.TestCase):
 
+	emptyElements = {
+		'embed',
+		'img',
+		'input',
+		'wbr',
+	}
+
 	def test_block_tag_content(self):
 		"""content of block-type tags should not be converted (except <p>)"""
 		testStr = '<div>this is stuff. <strong>stuff</strong></div>'
@@ -19,12 +26,38 @@ class TestGenericTags(unittest.TestCase):
 		mdStr = html2markdown.convert(testStr)
 		self.assertEqual(mdStr, expectedStr)
 
+	def test_inline_tag_break(self):
+		"""inline-type tags should not cause line breaks"""
+		emptyElements = self.emptyElements
+		for tag in html2markdown._inlineTags:
+			if tag not in emptyElements:
+				testStr = '<p>test <%s>test</%s> test</p>' % (tag, tag)
+			else:
+				testStr = '<p>test <%s /> test</p>' % tag
+			mdStr = html2markdown.convert(testStr)
+			bs = bs4.BeautifulSoup(markdown.markdown(mdStr), 'html.parser')
+
+			self.assertEqual(len(bs.find_all('p')), 1)
+
 	def test_inline_tag_content(self):
 		"""content of inline-type tags should be converted"""
-		testStr = '<span style="text-decoration:line-through;">strike <strong>through</strong> some text</span> here'
-		expectedStr = '<span style="text-decoration:line-through;">strike __through__ some text</span> here'
-		mdStr = html2markdown.convert(testStr)
-		self.assertEqual(mdStr, expectedStr)
+		emptyElements = self.emptyElements
+		for tag in html2markdown._inlineTags:
+			if tag in emptyElements:
+				continue
+
+			testStr = '<%s style="text-decoration:line-through;">strike <strong>through</strong> some text</%s> here' % (tag, tag)
+			expectedStr = '<%s style="text-decoration:line-through;">strike __through__ some text</%s> here' % (tag, tag)
+
+			mdStr = html2markdown.convert(testStr)
+
+			self.assertEqual(mdStr, expectedStr, 'Tag: {}'.format(tag))
+
+			bs = bs4.BeautifulSoup(markdown.markdown(mdStr), 'html.parser')
+			self.assertEqual(
+				len(bs.find_all('strong')), 1 if tag != 'strong' else 2,
+				'Tag: {}. Conversion: {}'.format(tag, mdStr)
+			)
 
 class TestEscaping(unittest.TestCase):
 
@@ -133,6 +166,13 @@ class TestTags(unittest.TestCase):
 
 		mdStr = html2markdown.convert(self.problematic_a_string_6)
 		self.assertEqual(mdStr, '[test](test2)')
+
+	def test_span(self):
+		"""content of inline-type tags should be converted"""
+		testStr = '<span style="text-decoration:line-through;">strike <strong>through</strong> some text</span> here'
+		expectedStr = '<span style="text-decoration:line-through;">strike __through__ some text</span> here'
+		mdStr = html2markdown.convert(testStr)
+		self.assertEqual(mdStr, expectedStr)
 
 if __name__ == '__main__':
 	unittest.main()
