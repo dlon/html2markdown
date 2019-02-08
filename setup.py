@@ -11,7 +11,7 @@ with io.open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='html2markdown',
     py_modules=['html2markdown'],
-    version='0.1.6.post0',
+    version='0.1.7',
     description='Conservatively convert html to markdown',
     author='David Lönnhager',
     author_email='dv.lnh.d@gmail.com',

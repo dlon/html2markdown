@@ -2,9 +2,9 @@
 html2markdown
 =============
 
-**Experimental**: I have only tested this with the Python markdown module, and under relatively limited circumstances.
+**Experimental**
 
-**Purpose**: Converts html to markdown while preserving unsupported html markup. The goal is to generate markdown that can be converted back into html. This is the major difference between html2markdown and html2text. The latter doesn't purport to necessarily be reversible.
+**Purpose**: Converts html to markdown while preserving unsupported html markup. The goal is to generate markdown that can be converted back into html. This is the major difference between html2markdown and html2text. The latter doesn't purport to be reversible.
 
 Usage example
 =============
@@ -69,5 +69,19 @@ Attributes not supported by Markdown are kept
 Limitations
 ===========
 
-- Currently, only underlines (_) and asterisks (*) are escaped.
 - Tables are kept as html.
+
+Changes
+=======
+
+0.1.7:
+
+- Improved handling of inline tags.
+- Fix: Ignore ``<a>`` tags without an href attribute.
+- Improve escaping.
+
+0.1.6: Added tests and support for Python versions below 2.7.
+
+0.1.5: Fix Unicode issue in Python 3.
+
+0.1.0: First version.
