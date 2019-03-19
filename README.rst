@@ -2,6 +2,9 @@
 html2markdown
 =============
 
+.. image:: https://travis-ci.com/dlon/html2markdown.svg?branch=master
+   :target: https://travis-ci.com/dlon/html2markdown
+
 **Experimental**
 
 **Purpose**: Converts html to markdown while preserving unsupported html markup. The goal is to generate markdown that can be converted back into html. This is the major difference between html2markdown and html2text. The latter doesn't purport to be reversible.
