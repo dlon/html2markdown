@@ -24,6 +24,7 @@
 import bs4
 from bs4 import BeautifulSoup
 import re
+from copy import copy
 
 import sys
 if sys.version_info[0] > 2:
@@ -41,7 +42,8 @@ _supportedTags = {
 	'br',
 	'img',
 	'pre','code',
-	'hr'
+	'hr',
+	'table'
 }
 _supportedAttributes = (
 	'a href',
@@ -113,6 +115,7 @@ _inlineTags = {
 	'wbr',
 }
 
+
 def _supportedAttrs(tag):
 	sAttrs = [attr.split(' ')[1] for attr in _supportedAttributes if attr.split(' ')[0]==tag.name]
 	for attr in tag.attrs:
@@ -159,6 +162,65 @@ def _breakRemNewlines(tag):
 		if type(c) != bs4.element.NavigableString:
 			continue
 		c.replace_with(re.sub(r' {2,}', ' ', c).replace('\n',''))
+
+
+ALIGN_TO_FMT = {
+	'': '<',
+	'right': '>',
+	'center': '^',
+	'left': '<'
+}
+
+
+def _render_row(row, widths, aligns):
+
+	is_header = False
+	_data = []
+	for i, cell in enumerate(row.children):
+		w = widths[i]
+		a = aligns[i]
+		if cell.name == 'th':
+			is_header = True
+		_data.append('{:{align}{width}}'.format(cell.text, align=ALIGN_TO_FMT[a], width=w))
+
+	output = ['| %s |' % (' | '.join(_data))]
+	if is_header:
+		_data = []
+		for j, w in enumerate(widths):
+			a = aligns[j]
+			if 'center' == a:
+				_data.append(':%s:' % ('-'*w))
+			elif 'right' == a:
+				_data.append(' %s:' % ('-'*w))
+			else:
+				_data.append(' %s ' % ('-'*w))
+		output.append('|%s|' % ('|'.join(_data)))
+	return output
+
+
+def _iterate_cols(row, widths, aligns):
+	_widths = copy(widths)
+	_aligns = copy(aligns)
+	for i, cell in enumerate(row.children):
+		# char widths
+		ln = len(cell.text)
+		if len(_widths) > i:
+			if _widths[i] < ln:
+				_widths[i] = ln
+		else:
+			_widths.append(ln)
+		# aligns
+		if len(_aligns) <= i:
+			_aligns.append('')
+		if 'style' in cell.attrs:
+			styles = cell.attrs['style'].split(';')
+			for s in styles:
+				[nam, valu] = [x.strip() for x in s.split(':')]
+				if nam == 'text-align':
+					_aligns[i] = valu
+					break
+	return _widths, _aligns
+
 
 def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 	"""recursively converts a tag into markdown"""
@@ -243,6 +305,20 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 		tag.insert_before('`` ')
 		tag.insert_after(' ``')
 		tag.unwrap()
+	elif tag.name == 'table':
+		widths = []
+		aligns = []
+		output = []
+		if tag.children.next().name in ['thead', 'tbody']:
+			for block in tag.children:
+				block.unwrap()
+		for row in tag.children:
+			widths, aligns = _iterate_cols(row, widths, aligns)
+		for row in tag.children:
+			output.extend(_render_row(row, widths, aligns))
+		tag.string = '\n'.join(output)
+		tag.unwrap()
+
 	elif _recursivelyValid(tag):
 		if tag.name == 'blockquote':
 			# ! FIXME: hack
@@ -328,6 +404,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 			tag.unwrap()
 		for child in children:
 			_markdownify(child)
+
 
 def convert(html):
 	"""converts an html string to markdown while preserving unsupported markup."""
