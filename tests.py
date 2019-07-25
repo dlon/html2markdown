@@ -59,6 +59,17 @@ class TestGenericTags(unittest.TestCase):
 				'Tag: {}. Conversion: {}'.format(tag, mdStr)
 			)
 
+	def test_table_tag(self):
+		"""<table> tags should be converted. columns should preserve width across rows.
+			td|th tag attr style="text-align: [left|center|right]" should be observed
+		"""
+		testStr = '<table><thead><tr><th><b>One</b></th><th style="text-align: right">Two</th></tr></thead>' \
+				  '<tbody><tr><td>Line 1</td><td>Second Line</td></tr></tbody></table>'
+		expectedStr = u'| One    |         Two |\n| ------ | -----------:|\n| Line 1 | Second Line |'
+		mdStr = html2markdown.convert(testStr)
+		self.assertEqual(mdStr, expectedStr)
+
+
 class TestEscaping(unittest.TestCase):
 
 	escapableChars = r'\`*_{}[]()#+-.!'
