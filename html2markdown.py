@@ -213,7 +213,7 @@ def _markdownify(tag, _listType=None, _blockQuote=False, _listIndex=1):
 		tag.string = '\n---\n'
 		tag.unwrap()
 	elif tag.name == 'pre':
-                tag.insert_before('\n\n```\n')
+		tag.insert_after('\n\n```\n')
 		tag.insert_after('\n```\n\n')
 		if tag.code:
 			if not _supportedAttrs(tag.code):
